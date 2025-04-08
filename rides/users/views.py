@@ -9,6 +9,12 @@ from django.views.generic import UpdateView
 
 from rides.users.models import User
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from allauth.account.forms import ResetPasswordForm
+from .serializers import PasswordResetSerializer
+from rest_framework.permissions import AllowAny
 
 class UserDetailView(LoginRequiredMixin, DetailView):
     model = User
@@ -44,3 +50,23 @@ class UserRedirectView(LoginRequiredMixin, RedirectView):
 
 
 user_redirect_view = UserRedirectView.as_view()
+
+class PasswordResetView(APIView):
+
+    authentication_classes = []  
+    permission_classes = [AllowAny] 
+
+    def post(self, request):
+
+        serializer = PasswordResetSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        form = ResetPasswordForm(data={'email': serializer.validated_data['email']})
+
+        if form.is_valid():
+
+            form.save(request)
+            return Response({'detail': _('Password reset email has been sent.')}, status=status.HTTP_200_OK)
+        
+        else:
+            return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
+
