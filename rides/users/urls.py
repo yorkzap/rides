@@ -4,7 +4,6 @@ from .views import user_detail_view
 from .views import user_redirect_view
 from .views import user_update_view
 from .views import PasswordResetView
-from .views import PasswordResetConfirmView
 
 
 app_name = "users"
