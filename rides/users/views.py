@@ -6,6 +6,10 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView
 from django.views.generic import RedirectView
 from django.views.generic import UpdateView
+from rest_framework import generics
+from rest_framework.permissions import AllowAny
+from rides.users.serializers import UserRegistrationSerializer
+from django.contrib.auth import get_user_model
 
 from rides.users.models import User
 
@@ -44,3 +48,17 @@ class UserRedirectView(LoginRequiredMixin, RedirectView):
 
 
 user_redirect_view = UserRedirectView.as_view()
+
+# View for registration
+class UserRegistrationView(generics.CreateAPIView):
+    """
+    API endpoint for user registration.
+    Allows users to sign up with an email, name, role, and password.
+    """
+    queryset = User.objects.all()
+    serializer_class = UserRegistrationSerializer
+    permission_classes = [AllowAny] 
+
+
+user_registration_view = UserRegistrationView.as_view()
+
