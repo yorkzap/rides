@@ -5,7 +5,7 @@ module.exports = merge(commonConfig, {
   mode: 'development',
   devtool: 'inline-source-map',
   devServer: {
-    port: 3000,
+    port: 8080,
     proxy: [
       {
         context: ['/'],
