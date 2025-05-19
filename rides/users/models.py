@@ -1,7 +1,7 @@
-
 from typing import ClassVar
 
 from django.contrib.auth.models import AbstractUser
+from django.db import models
 from django.db.models import CharField
 from django.db.models import EmailField
 from django.urls import reverse
@@ -17,12 +17,22 @@ class User(AbstractUser):
     check forms.SignupForm and forms.SocialSignupForms accordingly.
     """
 
+    class Role(models.TextChoices):
+        ADMIN = "ADMIN", _("Admin")
+        DRIVER = "DRIVER", _("Driver")
+        RIDER = "RIDER", _("Rider")
+
     # First and last name do not cover name patterns around the globe
     name = CharField(_("Name of User"), blank=True, max_length=255)
     first_name = None  # type: ignore[assignment]
     last_name = None  # type: ignore[assignment]
     email = EmailField(_("email address"), unique=True)
     username = None  # type: ignore[assignment]
+    role = models.CharField(
+        max_length=20,
+        choices=Role.choices,
+        default=Role.RIDER,  # Default role
+    )
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
@@ -34,6 +44,5 @@ class User(AbstractUser):
 
         Returns:
             str: URL for user detail.
-
         """
         return reverse("users:detail", kwargs={"pk": self.id})

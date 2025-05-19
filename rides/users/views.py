@@ -72,7 +72,6 @@ class PasswordResetView(APIView):
 
         form = ResetPasswordForm(data={"email": serializer.validated_data["email"]})
         if form.is_valid():
-            # Unwrap the DRF Request to a Django HttpRequest
             form.save(request._request)
             return Response(
                 {"detail": _("Password reset email has been sent.")},
@@ -92,6 +91,7 @@ class SignupView(APIView):
 
         email = serializer.validated_data["email"]
         password = serializer.validated_data["password"]
+        role = serializer.validated_data["role"]
 
         if User.objects.filter(email=email).exists():
             return Response(
@@ -99,9 +99,18 @@ class SignupView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        user = User.objects.create_user(email=email, password=password)
+        user = User.objects.create_user(
+            email=email,
+            password=password,
+            role=role,
+        )
+
         return Response(
-            {"detail": "User created successfully."},
+            {
+                "detail": "User created successfully.",
+                "email": user.email,
+                "role": user.role,
+            },
             status=status.HTTP_201_CREATED,
         )
 
@@ -125,10 +134,21 @@ class LoginView(APIView):
 
         django_login(request, user)
 
+        if user.role == User.Role.ADMIN:
+            redirect_url = "admin_url"
+        elif user.role == User.Role.DRIVER:
+            redirect_url = "driver_url"
+        elif user.role == User.Role.RIDER:
+            redirect_url = "rider_url"
+        else:
+            redirect_url = reverse("users:detail", kwargs={"pk": user.pk})
+
         return Response(
             {
                 "detail": "Logged in successfully.",
                 "email": user.email,
+                "role": user.role,
+                "redirect_url": redirect_url,
             },
             status=status.HTTP_200_OK,
         )
