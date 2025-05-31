@@ -105,6 +105,8 @@ class SignupView(APIView):
             role=role,
         )
 
+        send_email_confirmation(request, user)
+
         return Response(
             {
                 "detail": "User created successfully.",
